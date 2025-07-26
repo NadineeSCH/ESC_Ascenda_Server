@@ -5,7 +5,17 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "start": "node ./server.js"
+    "start": "node ./server.js",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "routes/**/*.js",
+      "utils/**/*.js",
+      "!**/node_modules/**"
+    ]
   },
   "keywords": [],
   "author": "",
@@ -13,7 +23,10 @@
   "type": "commonjs",
   "dependencies": {
     "ejs": "^3.1.10",
-    "express": "^5.1.0",
-    "jest": "^30.0.5"
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "jest": "^30.0.5",
+    "supertest": "^7.1.4"
   }
 }

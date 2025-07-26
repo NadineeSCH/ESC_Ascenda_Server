@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Search Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .search-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .search-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .search-btn:hover {
+            background-color: #0056b3;
+        }
+        .search-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .hotels-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .hotels-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .hotel-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: box-shadow 0.3s;
+        }
+        .hotel-item:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .hotel-info {
+            flex-grow: 1;
+        }
+        .hotel-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .hotel-rating {
+            color: #ff6b35;
+            margin-bottom: 5px;
+        }
+        .hotel-address {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .hotel-description {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .hotel-price {
+            text-align: center;
+            margin: 0 20px;
+            min-width: 120px;
+        }
+        .price-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .price-currency {
+            font-size: 14px;
+            color: #666;
+        }
+        .select-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .select-btn:hover {
+            background-color: #1e7e34;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .no-hotels {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <h1>Hotel Search Demo</h1>
+        <form id="searchForm">
+            <div class="form-group">
+                <label for="destinationId">Destination ID:</label>
+                <input type="text" id="destinationId" name="destinationId" placeholder="e.g. WD0M" required>
+            </div>
+            <div class="form-group">
+                <label for="checkin">Check-in Date:</label>
+                <input type="date" id="checkin" name="checkin" required>
+            </div>
+            <div class="form-group">
+                <label for="checkout">Check-out Date:</label>
+                <input type="date" id="checkout" name="checkout" required>
+            </div>
+            <div class="form-group">
+                <label for="guests">Number of Guests per Room:</label>
+                <input type="number" id="guests" name="guests" min="1" max="8" placeholder="2" required>
+            </div>
+            <button type="submit" class="search-btn" id="searchBtn">Search Hotels</button>
+        </form>
+    </div>
+
+    <div class="hotels-container">
+        <h2 class="hotels-title">List of Hotels:</h2>
+        <div id="hotelsList">
+            <div class="no-hotels">Enter search criteria above and click "Search Hotels" to see available hotels.</div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const searchParams = {
+                destinationId: formData.get('destinationId'),
+                checkin: formData.get('checkin'),
+                checkout: formData.get('checkout'),
+                guests: formData.get('guests')
+            };
+
+            // Validate dates
+            if (new Date(searchParams.checkin) >= new Date(searchParams.checkout)) {
+                alert('Check-out date must be after check-in date');
+                return;
+            }
+
+            const searchBtn = document.getElementById('searchBtn');
+            const hotelsList = document.getElementById('hotelsList');
+            
+            // Show loading state
+            searchBtn.disabled = true;
+            searchBtn.textContent = 'Searching...';
+            hotelsList.innerHTML = '<div class="loading">Searching for hotels...</div>';
+
+            try {
+                // Search for hotels
+                const response = await fetch('/searchhotels', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(searchParams)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to search hotels');
+                }
+
+                const hotels = await response.json();
+                displayHotels(hotels, searchParams);
+
+            } catch (error) {
+                console.error('Error searching hotels:', error);
+                hotelsList.innerHTML = '<div class="error">Error searching for hotels. Please try again.</div>';
+            } finally {
+                // Reset button state
+                searchBtn.disabled = false;
+                searchBtn.textContent = 'Search Hotels';
+            }
+        });
+
+        function displayHotels(hotels, searchParams) {
+            const hotelsList = document.getElementById('hotelsList');
+            
+            if (!hotels || hotels.length === 0) {
+                hotelsList.innerHTML = '<div class="no-hotels">No hotels found for the selected criteria.</div>';
+                return;
+            }
+
+            let hotelsHTML = '';
+            hotels.forEach(hotel => {
+                const rating = '★'.repeat(Math.floor(hotel.rating)) + '☆'.repeat(5 - Math.floor(hotel.rating));
+                const price = hotel.price ? `${hotel.price.toFixed(2)}` : 'N/A';
+                const currency = 'SGD'; // Default currency from your API
+                
+                hotelsHTML += `
+                    <div class="hotel-item">
+                        <div class="hotel-info">
+                            <div class="hotel-name">${hotel.name}</div>
+                            <div class="hotel-rating">${rating} (${hotel.rating})</div>
+                            <div class="hotel-address">${hotel.address}</div>
+                            ${hotel.description ? `<div class="hotel-description">${hotel.description.substring(0, 150)}...</div>` : ''}
+                        </div>
+                        <div class="hotel-price">
+                            <div class="price-amount">${price}</div>
+                            <div class="price-currency">${currency}</div>
+                        </div>
+                        <button class="select-btn" onclick="selectHotel('${hotel.id}', '${searchParams.destinationId}', '${searchParams.checkin}', '${searchParams.checkout}', '${searchParams.guests}')">
+                            Select
+                        </button>
+                    </div>
+                `;
+            });
+            
+            hotelsList.innerHTML = hotelsHTML;
+        }
+
+        function selectHotel(hotelId, destinationId, checkin, checkout, guests) {
+            // Store search parameters and navigate to hotel details page
+            const params = new URLSearchParams({
+                hotelId: hotelId,
+                destinationId: destinationId,
+                checkin: checkin,
+                checkout: checkout,
+                guests: guests
+            });
+            
+            // Navigate to hotel details page
+            window.open(`/hotel?${params.toString()}`, '_blank');
+        }
+
+        // Set default dates (today and tomorrow)
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        document.getElementById('checkin').value = today.toISOString().split('T')[0];
+        document.getElementById('checkout').value = tomorrow.toISOString().split('T')[0];
+        document.getElementById('guests').value = '2';
+    </script>
+</body>
+</html>
