@@ -1,11 +1,7 @@
-const express = require("express");
-var router = express.Router();
 const poller = require("../utils/utils.js").poller;
 
-router.post("/", async function (req, res, next) {
+async function getHotelDetails(req) {
   try {
-    res.set("Access-Control-Allow-Origin", "http://localhost:5000");
-
     //construct target url
     let guestsEachRoom = req.body.guestsEachRoom;
     let rooms = req.body.rooms;
@@ -19,10 +15,7 @@ router.post("/", async function (req, res, next) {
     try {
       data = await poller(targetUrl);
     } catch (error) {
-      res.status(500).json({
-        error: "error fetching data",
-        details: error.message,
-      });
+      throw new Error(`Failed to fetch from external API: ${error.message}`);
     }
     let cleanedJson = [];
 
@@ -45,13 +38,19 @@ router.post("/", async function (req, res, next) {
       cleanedJson.push(cleanedRoom);
     }
 
-    res.json(cleanedJson);
+    return { success: true, data: cleanedJson };
   } catch (error) {
-    res.status(500).json({
-      error: "internal server error",
-      details: error.message,
-    });
+    return {
+      success: false,
+      error: error.message,
+      details: {
+        endpoint: "hotelDetailsService",
+        timestamp: new Date().toISOString(),
+      },
+    };
   }
-});
+}
 
-module.exports = router;
+module.exports = {
+  getHotelDetails,
+};
