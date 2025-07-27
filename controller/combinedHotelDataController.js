@@ -8,7 +8,7 @@ async function getCombinedHotelData(req, res, next) {
     // Call both services concurrently for better performance
     const [hotelDetailsResult, hotelRoomsResult] = await Promise.all([
       hotelDetailsService.getHotelDetails(req),
-      hotelRoomsService.getHotelDetails(req)
+      hotelRoomsService.getRoomDetails(req)
     ]);
 
     // Check if both services succeeded
