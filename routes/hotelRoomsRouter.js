@@ -1,6 +1,6 @@
 const express = require("express");
 var router = express.Router();
-const hotelDetailsController = require("../controller/hotelDetailsController");
+const hotelDetailsController = require("../controller/hotelRoomsController")
 
 router.post("/", hotelDetailsController.getHotelDetails);
 

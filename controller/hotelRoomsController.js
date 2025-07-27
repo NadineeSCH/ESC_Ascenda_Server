@@ -1,4 +1,4 @@
-const hotelDetailsService = require("../service/hotelDetailsService");
+const hotelDetailsService = require("../service/hotelRoomsService");
 
 async function getHotelDetails(req, res, next) {
   try {
@@ -8,19 +8,16 @@ async function getHotelDetails(req, res, next) {
       res.json(result.data);
     } else {
       res.status(500).json({
-        error: "Hotel details fetch failed",
+        error: "Hotel data fetch failed",
         message: result.error,
         details: result.details,
       });
     }
   } catch (error) {
     res.status(500).json({
-      error: "Hotel details fetch failed",
-      message: error.message,
-      details: {
-        controller: "hotelDetailsController",
-        timestamp: new Date().toISOString(),
-      },
+      error: "Hotel data fetch failed",
+      message: result.error,
+      details: result.details,
     });
   }
 }

@@ -9,5 +9,16 @@ app.get("/", (req, res) => {
   res.render("hello");
 });
 
-const hoteldetailsRouter = require("./routes/hotelDetailsRouter");
-app.use("/hoteldetails", hoteldetailsRouter);
+// Individual route imports
+const hotelRoomsRouter = require("./routes/hotelRoomsRouter");
+const hotelDetailsRouter = require("./routes/hotelDetailsRouter");
+
+// Combined route import (orchestrator)
+const combinedHotelDataRouter = require("./routes/combinedHotelDataRouter");
+
+// Individual endpoints
+app.use("/hotelrooms", hotelRoomsRouter);           // For room data only
+app.use("/hoteldetails", hotelDetailsRouter);       // For hotel details only
+
+// Combined endpoint (orchestrator)
+app.use("/combined-hotel-data", combinedHotelDataRouter);
