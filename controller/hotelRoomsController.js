@@ -1,9 +1,9 @@
-const hotelDetailsService = require("../service/hotelRoomsService");
+const hotelRoomsService = require("../service/hotelRoomsService");
 
-async function getHotelDetails(req, res, next) {
+async function getRoomDetails(req, res, next) {
   try {
     res.set("Access-Control-Allow-Origin", "http://localhost:5000");
-    const result = await hotelDetailsService.getHotelDetails(req);
+    const result = await hotelRoomsService.getRoomDetails(req);
     if (result.success) {
       res.json(result.data);
     } else {
@@ -23,5 +23,5 @@ async function getHotelDetails(req, res, next) {
 }
 
 module.exports = {
-  getHotelDetails,
+  getRoomDetails,
 };

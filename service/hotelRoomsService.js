@@ -1,6 +1,6 @@
 const poller = require("../utils/utils.js").poller;
 
-async function getHotelDetails(req) {
+async function getRoomDetails(req) {
   try {
     //construct target url
     let guestsEachRoom = req.body.guestsEachRoom;
@@ -52,5 +52,5 @@ async function getHotelDetails(req) {
 }
 
 module.exports = {
-  getHotelDetails,
+  getRoomDetails,
 };
