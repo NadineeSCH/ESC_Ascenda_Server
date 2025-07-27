@@ -1,7 +1,7 @@
 const express = require("express");
 var router = express.Router();
-const hotelDetailsController = require("../controller/hotelRoomsController")
+const roomDetailsController = require("../controller/hotelRoomsController")
 
-router.post("/", hotelDetailsController.getHotelDetails);
+router.post("/", roomDetailsController.getRoomDetails);
 
 module.exports = router;

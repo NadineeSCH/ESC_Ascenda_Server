@@ -1,21 +1,21 @@
-const hotelDetailsService = require("../service/hotelRoomsService");
+const hotelRoomsService = require("../service/hotelRoomsService");
 
-async function getHotelDetails(req, res, next) {
+async function getRoomDetails(req, res, next) {
   try {
     res.set("Access-Control-Allow-Origin", "http://localhost:5000");
-    const result = await hotelDetailsService.getHotelDetails(req);
+    const result = await hotelRoomsService.getRoomDetails(req);
     if (result.success) {
       res.json(result.data);
     } else {
       res.status(500).json({
-        error: "Hotel data fetch failed",
+        error: "Room data fetch failed",
         message: result.error,
         details: result.details,
       });
     }
   } catch (error) {
     res.status(500).json({
-      error: "Hotel data fetch failed",
+      error: "Room data fetch failed",
       message: result.error,
       details: result.details,
     });
@@ -23,5 +23,5 @@ async function getHotelDetails(req, res, next) {
 }
 
 module.exports = {
-  getHotelDetails,
+  getRoomDetails,
 };

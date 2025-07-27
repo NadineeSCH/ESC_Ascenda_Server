@@ -9,6 +9,12 @@ app.get("/", (req, res) => {
   res.render("hello");
 });
 
+console.log("Running from", __dirname);
+
+app.get("/test", (req, res) => {
+  res.send("Server is working!");
+});
+
 // Individual route imports
 const hotelRoomsRouter = require("./routes/hotelRoomsRouter");
 const hotelDetailsRouter = require("./routes/hotelDetailsRouter");

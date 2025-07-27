@@ -1,14 +1,18 @@
-const poller = require("../utils/utils.js").poller;
-
 async function getHotelDetails(req) {
   try {
-    // Get hotelId from request body
     const hotelId = req.body.hotelId;
     const targetUrl = `https://hotelapi.loyalty.dev/api/hotels/${hotelId}`;
     
     let hotelData;
     try {
-      hotelData = await poller(targetUrl);
+      const response = await fetch(targetUrl);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      hotelData = await response.json();
+      
     } catch (error) {
       throw new Error(`Failed to fetch from external API: ${error.message}`);
     }
