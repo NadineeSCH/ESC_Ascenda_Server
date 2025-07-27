@@ -22,3 +22,15 @@ app.use("/hoteldetails", hotelDetailsRouter);       // For hotel details only
 
 // Combined endpoint (orchestrator)
 app.use("/combined-hotel-data", combinedHotelDataRouter);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({
+      error: "Bad Request",
+      message: "Invalid JSON payload"
+    });
+  }
+  // Handle other errors
+  res.status(500).json({ error: "Internal Server Error" });
+});
