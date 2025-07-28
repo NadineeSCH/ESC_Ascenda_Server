@@ -44,7 +44,7 @@ async function processSearchResults(reqParams31, reqParams32) {
                 if (hotelStaticInfo.number_of_images !== 0) {
                     cleanedHotel.imageUrl = hotelStaticInfo.image_details.prefix + defaultImg;
                 } else {
-                    cleanedHotel.imageUrl = '';
+                    cleanedHotel.imageUrl = null;
                 }
             }
 

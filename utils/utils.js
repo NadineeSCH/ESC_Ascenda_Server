@@ -2,31 +2,44 @@ const axios = require('axios');
 const querystring = require('querystring');
 
 // ------------ poller fn -------------------- //
-const delay = (ms) => new Promise (resolve => setTimeout(resolve,ms));
-
 async function poller(targetUrl) {
-    let attempt = 1;
-    const max_attempts = 5;
-    let completed = false;
+  let completed = false;
+  const POLL_INTERVAL = 500; // Poll every half a second
+  let attempts = 0;
+  const MAX_ATTEMPTS = 10;
 
-    while (!completed && attempt <= max_attempts) {
-        try {
+  return new Promise((resolve, reject) => {
+    const fetchData = async () => {
+      try {
+        attempts++;
+        if (attempts <= MAX_ATTEMPTS) {
             const response = await fetch(targetUrl);
             const data = await response.json();
 
-            if (data.completed) {
-                completed = true;
-                return data;
-            } else {
-                await delay(1000);
-                attempt++;
+            // Stop polling if completed is true
+            if (data.completed == true) {
+            completed = true;
+            resolve(data);
             }
-        } catch (error) {
-            await delay(1000);
-            attempt++;
+            else {
+            // If not completed, continue polling
+            loop();
+            }
         }
+        else {
+            throw new Error();
+        }
+      } catch (err) {
+        console.error("Error fetching data", err);
+        reject(err);
+      }
+    };
+
+    const loop = async () => {
+        setTimeout(fetchData,POLL_INTERVAL);
     }
-    throw new Error(`poller failed: max attempts (${max_attempts}) reached for ${targetUrl}`);
+    loop(); // Start the polling loop
+  });
 }
 
 // -----------------------------------------//
@@ -42,10 +55,16 @@ function ascendaApiBuilder (api_no, reqParams) {
     const baseUrl = "https://hotelapi.loyalty.dev/api/hotels";
     let fullUrl;
     if (api_no === 1) {
-        fullUrl = `${baseUrl}/prices?${querystring.stringify(reqParams)}`
+        fullUrl = `${baseUrl}/prices?${querystring.stringify(reqParams)}`;
     }
     if (api_no === 2) {
-        fullUrl = `${baseUrl}?${querystring.stringify(reqParams)}`
+        fullUrl = `${baseUrl}?${querystring.stringify(reqParams)}`;
+    }
+    if (api_no === 3) {
+        fullUrl = `${baseUrl}/${reqParams.hotel_id}/price?${querystring.stringify(reqParams)}`;
+    }
+    if (api_no === 4) {
+        fullUrl = `${baseUrl}/${reqParams.hotel_id}`;
     }
     return fullUrl;
 }
@@ -62,16 +81,16 @@ async function ascendaApiCaller (api_no, reqParams) {
 
     try {
         let data;
-        if (api_no === 1) {
+        if (api_no === 1 || api_no === 3) {
             data = await poller(targetUrl);
         }
         else {
-            const response = await fetch(targetUrl)
+            const response = await fetch(targetUrl);
             data = await response.json();
         }
         return data;
     } catch (error) {
-        throw new Error(`ascendaApiCaller failed for api_no ${api_no}: ${error.message}`, {cause: error});
+        throw new Error(`Failed to fetch from external API: ${error.message}`);
     }
 }
 
@@ -79,4 +98,4 @@ function safeAssign(value) {
   return (value === undefined || value === '' || value === null) ? null : value;
 }
 
-module.exports = {delay, poller, ascendaApiBuilder, ascendaApiCaller, safeAssign};
+module.exports = {poller, ascendaApiBuilder, ascendaApiCaller, safeAssign};

@@ -16,6 +16,25 @@ class ReqParam32 {
     }
 }
 
+class ReqParam33 {
+    constructor ({ hotel_id, destination_id, checkin, checkout, lang, currency, guests, partner_id }) {
+        this.hotel_id = hotel_id ?? null
+        this.destination_id = destination_id ?? null;
+        this.checkin = checkin ?? null;
+        this.checkout = checkout ?? null;
+        this.lang = lang ?? null;
+        this.currency = currency ?? null;
+        this.guests = guests ?? null;
+        this.partner_id = partner_id ?? null;
+    }
+}
+
+class ReqParam34 {
+    constructor ({ hotel_id }) {
+        this.hotel_id = hotel_id ?? null
+    }
+}
+
 class HotelResult {
     constructor() {
         this.id = null;
