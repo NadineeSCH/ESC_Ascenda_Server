@@ -62,7 +62,7 @@ async function ascendaApiCaller (api_no, reqParams) {
 
     try {
         let data;
-        if (api_no === 1 || api_no === 3) {
+        if (api_no === 1) {
             data = await poller(targetUrl);
         }
         else {
