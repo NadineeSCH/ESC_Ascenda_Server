@@ -63,7 +63,7 @@ describe("hotelDetailsService", () => {
       });
 
       // Verify the correct URL was called
-      const expectedUrl = `https://hotelapi.loyalty.dev/api/hotels/123/price?destination_id=456&checkin=2023-01-01&checkout=2023-01-05&lang=en_US&currency=SGD&country_code=SG&guests=2&partner_id=1`;
+      const expectedUrl = `https://hotelapi.loyalty.dev/api/hotels/123/price?destination_id=456&checkin=2023-01-01&checkout=2023-01-05&lang=en_US&currency=SGD&country_code=SG&guests=2&partner_id=1089&landing_page=wl-acme-earn&product_type=earn`;
       expect(fetchMock).toHaveBeenCalledWith(expectedUrl);
     });
 
