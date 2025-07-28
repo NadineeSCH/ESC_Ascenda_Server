@@ -11,6 +11,7 @@ async function getRoomDetails(req) {
     }
     guests += guestsEachRoom;
     const targetUrl = `https://hotelapi.loyalty.dev/api/hotels/${req.body.hotelId}/price?destination_id=${req.body.destinationId}&checkin=${req.body.checkin}&checkout=${req.body.checkout}&lang=en_US&currency=${req.body.currency}&country_code=SG&guests=${guests}&partner_id=1`;
+    
     let data;
     try {
       data = await poller(targetUrl);
@@ -44,7 +45,7 @@ async function getRoomDetails(req) {
       success: false,
       error: error.message,
       details: {
-        endpoint: "hotelDetailsService",
+        endpoint: "roomDetailsService",
         timestamp: new Date().toISOString(),
       },
     };
