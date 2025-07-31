@@ -2,7 +2,7 @@ let utils = require('../utils/utils.js');
 let dto = require('../DTO/DTO.js');
 const defaultImg = '1.jpg';
 
-async function processSearchResults(reqParams31, reqParams32) {
+async function processSearchResults(reqParams31, reqParams32, filters, sort) {
     try {
         const data1 = await utils.ascendaApiCaller(1, reqParams31);
         const data2 = await utils.ascendaApiCaller(2, reqParams32);
@@ -29,7 +29,7 @@ async function processSearchResults(reqParams31, reqParams32) {
         data1.hotels.forEach((hotel) => {
             const cleanedHotel = new dto.HotelResult();
             cleanedHotel.id = utils.safeAssign(hotel.id);
-            cleanedHotel.price = utils.safeAssign(hotel.price);
+            cleanedHotel.price = utils.safeAssign(hotel.price)
 
             const hotelStaticInfo = returnedHotelListMap.get(cleanedHotel.id) || null;
             if (hotelStaticInfo !== null) {
@@ -46,10 +46,55 @@ async function processSearchResults(reqParams31, reqParams32) {
                 } else {
                     cleanedHotel.imageUrl = null;
                 }
+                let score = utils.safeAssign(hotelStaticInfo.trustyou.score.overall);
+                cleanedHotel.score = score;
             }
+
+            let skip = false;
+
+            if (filters !== null) {
+                if (filters.minPrice !== null && cleanedHotel.price < filters.minPrice) {
+                    skip = true;
+                }
+                if (filters.maxPrice !== null && cleanedHotel.price > filters.maxPrice) {
+                    skip = true;
+                }
+                if (filters.minRating !== null && cleanedHotel.rating < filters.minRating) {
+                    skip = true;
+                }
+                if (filters.maxRating !== null && cleanedHotel.rating > filters.maxRating) {
+                    skip = true;
+                }
+                if (filters.minScore !== null && cleanedHotel.score < filters.minScore) {
+                    skip = true;
+                }
+                if (filters.maxScore !== null && cleanedHotel.score > filters.maxScore) {
+                    skip = true;
+                }
+            }
+
+            if (skip) return;
 
             cleanedHotelList.push(cleanedHotel);
         });
+        
+        let sortField = null;
+        let reverse = false;
+        if (sort !== null) {
+            sortField = sort.sortVar;
+            reverse = sort.reverse;
+        } if (sortField !== null && (sortField === 'price' || sortField === 'rating')) {
+            cleanedHotelList.sort((a,b) => {
+                if (a[sortField] == null && b[sortField] == null) return 0;
+                if (a[sortField] == null) return 1; // move nulls to the end
+                if (b[sortField] == null) return -1;
+                if (reverse) {
+                    return b[sortField] - a[sortField];
+                } else {
+                    return a[sortField] - b[sortField];
+                }
+            })
+        }
 
         return cleanedHotelList;
     } catch (error) {

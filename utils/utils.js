@@ -49,22 +49,15 @@ function ascendaApiBuilder (api_no, reqParams) {
     /*
     api_no = 1 -> 3.1 -> hotel prices for a given destination
     api_no = 2 -> 3.2 -> static info about the hotels belonging to a particular destination
-    api_no = 3 -> 3.3 -> price of rooms for a given hotel
-    api_no = 4 -> 3.4 -> static info for a given hotel
     */
     const baseUrl = "https://hotelapi.loyalty.dev/api/hotels";
+    const devEnv = "&landing_page=wl-acme-earn&product_type=earn"
     let fullUrl;
     if (api_no === 1) {
-        fullUrl = `${baseUrl}/prices?${querystring.stringify(reqParams)}`;
+        fullUrl = `${baseUrl}/prices?${querystring.stringify(reqParams)}${devEnv}`;
     }
     if (api_no === 2) {
-        fullUrl = `${baseUrl}?${querystring.stringify(reqParams)}`;
-    }
-    if (api_no === 3) {
-        fullUrl = `${baseUrl}/${reqParams.hotel_id}/price?${querystring.stringify(reqParams)}`;
-    }
-    if (api_no === 4) {
-        fullUrl = `${baseUrl}/${reqParams.hotel_id}`;
+        fullUrl = `${baseUrl}?${querystring.stringify(reqParams)}${devEnv}`;
     }
     return fullUrl;
 }
@@ -73,8 +66,6 @@ async function ascendaApiCaller (api_no, reqParams) {
     /*
     api_no = 1 -> 3.1 -> use poller
     api_no = 2 -> 3.2 -> dont use poller
-    api_no = 3 -> 3.3 -> use poller
-    api_no = 4 -> 3.4 -> dont use poller
     */
 
     const targetUrl = ascendaApiBuilder(api_no, reqParams);

@@ -1,14 +1,15 @@
 class ReqParam31 {
-    constructor ({ destination_id, checkin, checkout, lang, currency, guests, partner_id }) {
+    constructor ({ destination_id, checkin, checkout, lang, currency }) {
         this.destination_id = destination_id ?? null;
         this.checkin = checkin ?? null;
         this.checkout = checkout ?? null;
         this.lang = lang ?? null;
         this.currency = currency ?? null;
         this.guests = guests ?? null;
-        this.partner_id = partner_id ?? null;
+        this.partner_id = 1098
     }
 }
+
 
 class ReqParam32 {
     constructor ({ destination_id }) {
@@ -16,22 +17,21 @@ class ReqParam32 {
     }
 }
 
-class ReqParam33 {
-    constructor ({ hotel_id, destination_id, checkin, checkout, lang, currency, guests, partner_id }) {
-        this.hotel_id = hotel_id ?? null
-        this.destination_id = destination_id ?? null;
-        this.checkin = checkin ?? null;
-        this.checkout = checkout ?? null;
-        this.lang = lang ?? null;
-        this.currency = currency ?? null;
-        this.guests = guests ?? null;
-        this.partner_id = partner_id ?? null;
+class filterParams {
+    constructor({ minPrice, maxPrice, minRating, maxRating, minScore, maxScore }) {
+        this.minPrice = minPrice;
+        this.maxPrice = maxPrice;
+        this.minRating = minRating;
+        this.maxRating = maxRating;
+        this.minScore = minScore;
+        this.maxScore = maxScore;
     }
 }
 
-class ReqParam34 {
-    constructor ({ hotel_id }) {
-        this.hotel_id = hotel_id ?? null
+class sortParams {
+    constructor({ sort_var, reverse }) {
+        this.sortVar = sort_var;
+        this.reverse = reverse;
     }
 }
 
@@ -48,20 +48,16 @@ class HotelResult {
         this.distance = null;
         this.checkinTime = null;
         this.imageUrl = null;
+        this.score = null;
     }
 }
 
-
-/*class SearchResult {
-    constructor() {
-        this.hotelList = [];
-    }
-}*/
 
 
 module.exports = {
     ReqParam31,
     ReqParam32,
-    HotelResult,
-    //SearchResult
+    sortParams,
+    filterParams,
+    HotelResult
 }
