@@ -5,7 +5,7 @@ class ReqParam31 {
         this.checkout = checkout ?? null;
         this.lang = lang ?? null;
         this.currency = currency ?? null;
-        this.guests = guests ?? null;
+        this.guests = null;
         this.partner_id = 1098
     }
 }

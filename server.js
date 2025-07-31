@@ -1,7 +1,18 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
+
+// Allows frontend on port 3000 to make requests
+app.use(cors({ origin: "http://localhost:3000" }));
+
 app.use(express.json());
-app.listen(3000);
+
+// Setting backend server to be on port 5000
+const PORT = 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+
 
 app.set("view engine", "ejs");
 

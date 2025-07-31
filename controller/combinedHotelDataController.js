@@ -3,8 +3,6 @@ const hotelRoomsService = require("../service/hotelRoomsService");
 
 async function getCombinedHotelData(req, res, next) {
   try {
-    res.set("Access-Control-Allow-Origin", "http://localhost:5000");
-
     try {
       if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({
