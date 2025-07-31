@@ -1,5 +1,5 @@
 class ReqParam31 {
-    constructor ({ destination_id, checkin, checkout, lang, currency }) {
+    constructor ({ destination_id, checkin, checkout, lang, currency, guests}) {
         this.destination_id = destination_id ?? null;
         this.checkin = checkin ?? null;
         this.checkout = checkout ?? null;

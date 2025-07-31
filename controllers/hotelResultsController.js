@@ -25,7 +25,7 @@ async function getSearchResults(req, res, next) {
     
     let sort;
     if (body.sort_exist) {
-        sort = new dto.sortParams({sortVar: body.sort_var, reverse: body.reverse})
+        sort = new dto.sortParams({sort_var: body.sort_var, reverse: body.reverse})
     } else {
         sort = null;
     }
