@@ -4,11 +4,33 @@ const hotelRoomsService = require("../service/hotelRoomsService");
 async function getCombinedHotelData(req, res, next) {
   try {
     res.set("Access-Control-Allow-Origin", "http://localhost:5000");
+
+    try {
+      if (!req.body || Object.keys(req.body).length === 0) {
+        return res.status(400).json({
+          error: "Empty JSON Body",
+          message: "Please provide a proper JSON body",
+          details: {
+            endpoint: "combinedHotelDataController",
+          }
+        });
+      }
+    } catch (error) {
+      return res.status(400).json({
+        error: "Invalid Request",
+        message: "Failed to parse JSON body",
+        details: {
+          endpoint: "combinedHotelDataController",
+        }
+      });
+    }
+
+    const hotelId = req.body.hotelId;
     
     // Call both services concurrently for better performance
     const [hotelDetailsResult, hotelRoomsResult] = await Promise.all([
-      hotelDetailsService.getHotelDetails(req),
-      hotelRoomsService.getRoomDetails(req)
+      hotelDetailsService.getHotelDetails(hotelId),
+      hotelRoomsService.getRoomDetails(req.body)
     ]);
 
     // Check if both services succeeded

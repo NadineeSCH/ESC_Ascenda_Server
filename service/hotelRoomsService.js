@@ -3,6 +3,28 @@ const poller = require("../utils/utils.js").poller;
 async function getRoomDetails(req) {
   try {
     //construct target url
+          // Check if checkout date is before checkin date
+    // try {
+    //   if (checkoutDate <= checkinDate) {
+    //     return res.status(400).json({
+    //       error: "Invalid checkout date",
+    //       message: "Check-out date must be after check-in date",
+    //       details: {
+    //         endpoint: "getRoomDetails",
+    //         timestamp: new Date().toISOString(),
+    //       }
+    //     });
+    //   }
+    // } catch (dateError) {
+    //   return res.status(400).json({
+    //     error: "Invalid date format",
+    //     message: "Please provide valid checkin and checkout dates",
+    //     details: {
+    //       endpoint: "getRoomDetails",
+    //       timestamp: new Date().toISOString(),
+    //     }
+    //   });
+    // }
     let guestsEachRoom = req.body.guestsEachRoom;
     let rooms = req.body.rooms;
     let guests = "";

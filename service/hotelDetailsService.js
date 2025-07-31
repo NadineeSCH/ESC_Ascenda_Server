@@ -1,6 +1,6 @@
-async function getHotelDetails(req) {
+async function getHotelDetails(hotelId) {
   try {
-    const hotelId = req.body.hotelId;
+    
     const targetUrl = `https://hotelapi.loyalty.dev/api/hotels/${hotelId}`;
     
     let hotelData;
@@ -37,6 +37,7 @@ async function getHotelDetails(req) {
     };
 
     return { success: true, data: cleanedHotelData };
+
   } catch (error) {
     return {
       success: false,

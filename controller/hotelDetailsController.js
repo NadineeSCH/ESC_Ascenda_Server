@@ -3,8 +3,10 @@ const hotelDetailsService = require("../service/hotelDetailsService");
 async function getHotelDetails(req, res, next) {
   try {
     res.set("Access-Control-Allow-Origin", "http://localhost:5000");
+
+    const hotelId = req.body.hotelId;
     
-    const result = await hotelDetailsService.getHotelDetails(req);
+    const result = await hotelDetailsService.getHotelDetails(hotelId);
     
     if (result.success) {
       res.json(result.data);
