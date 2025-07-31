@@ -3,20 +3,17 @@ const poller = require("../utils/utils.js").poller;
 async function getRoomDetails(req) {
   try {
     //construct target url
-    let guestsEachRoom = req.body.guestsEachRoom;
-    let rooms = req.body.rooms;
+    let guestsEachRoom = req.guestsEachRoom;
+    let rooms = req.rooms;
     let guests = "";
     for (let i = 0; i < rooms - 1; i++) {
       guests = guests + guestsEachRoom + "|";
     }
     guests += guestsEachRoom;
-    const targetUrl = `https://hotelapi.loyalty.dev/api/hotels/${req.body.hotelId}/price?destination_id=${req.body.destinationId}&checkin=${req.body.checkin}&checkout=${req.body.checkout}&lang=en_US&currency=${req.body.currency}&country_code=SG&guests=${guests}&partner_id=1089&landing_page=wl-acme-earn&product_type=earn`;
+    const targetUrl = `https://hotelapi.loyalty.dev/api/hotels/${req.hotel_id}/price?destination_id=${req.destination_id}&checkin=${req.checkin}&checkout=${req.checkout}&lang=en_US&currency=${req.currency}&country_code=SG&guests=${guests}&partner_id=1089&landing_page=wl-acme-earn&product_type=earn`;
     let data;
-    try {
-      data = await poller(targetUrl);
-    } catch (error) {
-      throw new Error(`Failed to fetch from external API: ${error.message}`);
-    }
+
+    data = await poller(targetUrl);
 
     let cleanedJson = [];
     for (const room of data.rooms) {

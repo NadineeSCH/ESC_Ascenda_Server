@@ -5,21 +5,30 @@
 async function poller(targetUrl) {
   let completed = false;
   const POLL_INTERVAL = 500; // Poll every half a second
+  let attempts = 0;
+  const MAX_ATTEMPTS = 10;
+  console.log("Polling started for URL:", targetUrl);
 
   return new Promise((resolve, reject) => {
     const fetchData = async () => {
       try {
-        const response = await fetch(targetUrl);
-        const data = await response.json();
+        attempts++;
+        if (attempts <= MAX_ATTEMPTS) {
+            const response = await fetch(targetUrl);
+            const data = await response.json();
 
-        // Stop polling if completed is true
-        if (data.completed == true) {
-          completed = true;
-          resolve(data);
+            // Stop polling if completed is true
+            if (data.completed == true) {
+            completed = true;
+            resolve(data);
+            }
+            else {
+            // If not completed, continue polling
+            loop();
+            }
         }
         else {
-          // If not completed, continue polling
-          loop();
+            throw new Error();
         }
       } catch (err) {
         console.error("Error fetching data", err);
