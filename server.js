@@ -18,6 +18,7 @@ app.get("/test", (req, res) => {
 // Individual route imports
 const hotelRoomsRouter = require("./routes/hotelRoomsRouter");
 const hotelDetailsRouter = require("./routes/hotelDetailsRouter");
+const hotelResultsRouter = require("./routes/hotelResultsRouter");
 
 // Combined route import (orchestrator)
 const combinedHotelDataRouter = require("./routes/combinedHotelDataRouter");
@@ -28,6 +29,9 @@ app.use("/hoteldetails", hotelDetailsRouter);       // For hotel details only
 
 // Combined endpoint (orchestrator)
 app.use("/combined-hotel-data", combinedHotelDataRouter);
+
+// Hotel Results endpoint
+app.use("/hotelresults", hotelResultsRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
