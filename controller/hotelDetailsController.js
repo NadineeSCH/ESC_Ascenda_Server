@@ -2,7 +2,7 @@ const hotelDetailsService = require("../service/hotelDetailsService");
 
 async function getHotelDetails(req, res, next) {
   try {
-    const result = await hotelDetailsService.getHotelDetails(req);
+    const result = await hotelDetailsService.getHotelDetails(req.body.hotel_id);
     
     if (result.success) {
       res.json(result.data);
