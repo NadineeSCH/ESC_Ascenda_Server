@@ -62,7 +62,7 @@ async function getCombinedHotelData(req, res, next) {
     // Call both services concurrently for better performance
     [hotelDetailsResult, hotelRoomsResult] = await Promise.all([
       hotelDetailsService.getHotelDetails(req.body.hotel_id),
-      hotelRoomsService.getRoomDetails(req.body)
+      hotelRoomsService.getRoomDetails(req.body),
     ]);
 
   } catch (error) {

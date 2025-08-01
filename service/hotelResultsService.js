@@ -38,7 +38,12 @@ async function processSearchResults(reqParams31, reqParams32, filters, sort) {
                 cleanedHotel.longitude = utils.safeAssign(hotelStaticInfo.longitude);
                 cleanedHotel.description = utils.safeAssign(hotelStaticInfo.description);
                 cleanedHotel.address = utils.safeAssign(hotelStaticInfo.address);
-                cleanedHotel.rating = utils.safeAssign(hotelStaticInfo.rating);
+                // Assign 2.5 rating if rating = null
+                if (utils.safeAssign(hotelStaticInfo.rating) === null) {
+                    cleanedHotel.rating = 2.5;
+                } else {
+                    cleanedHotel.rating = hotelStaticInfo.rating;
+                }
                 cleanedHotel.distance = utils.safeAssign(hotelStaticInfo.distance);
                 cleanedHotel.checkinTime = utils.safeAssign(hotelStaticInfo.checkin_time);
                 if (hotelStaticInfo.number_of_images !== 0) {
@@ -47,7 +52,12 @@ async function processSearchResults(reqParams31, reqParams32, filters, sort) {
                     cleanedHotel.imageUrl = null;
                 }
                 let score = utils.safeAssign(hotelStaticInfo.trustyou.score.overall);
-                cleanedHotel.score = score;
+                // Assign 70 score if score = null
+                if (score === null) {
+                    cleanedHotel.score = 70;
+                } else {
+                    cleanedHotel.score = score;
+                }
             }
 
             let skip = false;
@@ -83,7 +93,7 @@ async function processSearchResults(reqParams31, reqParams32, filters, sort) {
         if (sort !== null) {
             sortField = sort.sortVar;
             reverse = sort.reverse;
-        } if (sortField !== null && (sortField === 'price' || sortField === 'rating')) {
+        } if (sortField !== null && (sortField === 'price' || sortField === 'rating' || sortField === 'score')) {
             cleanedHotelList.sort((a,b) => {
                 if (a[sortField] == null && b[sortField] == null) return 0;
                 if (a[sortField] == null) return 1; // move nulls to the end
