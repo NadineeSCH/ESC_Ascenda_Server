@@ -68,4 +68,17 @@ describe("poller function", () => {
 
     jest.useRealTimers();
   });
+
+  it("should throw error once maximum attempts is reached", async () => {
+    const maxAttempts = 10;
+    const mockResponses = Array(maxAttempts).fill({ completed: false });
+    mockResponses.push({ completed: false }); // One extra to trigger max attempts
+    
+    // Mock sequential responses
+    fetchMock.mockResponses(
+      ...mockResponses.map(response => [JSON.stringify(response), { status: 200 }])
+    );
+    
+    await expect(poller("http://test.url")).rejects.toThrow("Max attempts reached");
+  },10000); // Increased timeout for this test
 });
