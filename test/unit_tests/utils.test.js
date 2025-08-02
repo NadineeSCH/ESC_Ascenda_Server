@@ -1,5 +1,5 @@
 // utils.test.js
-const { poller } = require("../utils/utils");
+const { poller } = require("../../utils/utils");
 const fetchMock = require("jest-fetch-mock");
 
 // Enable fetch mocking

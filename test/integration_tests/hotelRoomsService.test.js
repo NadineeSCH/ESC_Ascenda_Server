@@ -1,4 +1,4 @@
-const { getRoomDetails } = require("../service/hotelRoomsService");
+const { getRoomDetails } = require("../../service/hotelRoomsService");
 const fetchMock = require("jest-fetch-mock");
 
 // Enable fetch mocking
