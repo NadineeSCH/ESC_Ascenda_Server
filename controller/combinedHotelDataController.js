@@ -29,6 +29,30 @@ async function getCombinedHotelData(req, res, next) {
 
   const checkinDate = new Date(req.body.checkin);
   const checkoutDate = new Date(req.body.checkout);
+
+  // Check if dates are valid
+  if (isNaN(checkinDate.getTime())) {
+    return res.status(400).json({
+      error: "Invalid checkin date",
+      message: "Check-in date must be at least 3 days from today",
+      details: {
+        endpoint: "combinedHotelDataController",
+        timestamp: new Date().toISOString(),
+      }
+    });
+  }
+  
+  if (isNaN(checkoutDate.getTime())) {
+    return res.status(400).json({
+      error: "Invalid checkout date",
+      message: "Check-out date must be after check-in date",
+      details: {
+        endpoint: "combinedHotelDataController",
+        timestamp: new Date().toISOString(),
+      }
+    });
+  }
+  
   const today = new Date();
   const threeDaysFromNow = new Date(today.getTime() + (3 * 24 * 60 * 60 * 1000));
   threeDaysFromNow.setHours(0, 0, 0, 0);
@@ -66,7 +90,7 @@ async function getCombinedHotelData(req, res, next) {
     ]);
 
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       error: "Combined hotel data fetch failed",
       message: error.message,
       details: {

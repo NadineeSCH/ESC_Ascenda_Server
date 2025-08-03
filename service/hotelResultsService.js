@@ -3,9 +3,13 @@ let dto = require('../DTO/DTO.js');
 const defaultImg = '1.jpg';
 
 async function processSearchResults(reqParams31, reqParams32, filters, sort) {
+    let data1, data2;
     try {
-        const data1 = await utils.ascendaApiCaller(1, reqParams31);
-        const data2 = await utils.ascendaApiCaller(2, reqParams32);
+        data1 = await utils.ascendaApiCaller(1, reqParams31);
+        data2 = await utils.ascendaApiCaller(2, reqParams32);
+        } catch (error) {
+        throw new Error(`hotelResultsService.processSearchResults failed: ${error.message}`, { cause: error });
+    }
 
         if (!data1?.hotels || !Array.isArray(data1.hotels)) {
             throw new Error("Invalid hotel price list from data1.");
@@ -107,9 +111,7 @@ async function processSearchResults(reqParams31, reqParams32, filters, sort) {
         }
 
         return cleanedHotelList;
-    } catch (error) {
-        throw new Error(`hotelResultsService.processSearchResults failed: ${error.message}`, { cause: error });
-    }
+    
 }
 
 
