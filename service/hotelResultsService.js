@@ -1,4 +1,4 @@
-let utils = require('../utils/utils.js');
+let utils = require('../utils/utils2.js');
 let dto = require('../DTO/DTO.js');
 const defaultImg = '1.jpg';
 
@@ -110,7 +110,7 @@ async function processSearchResults(reqParams31, reqParams32, filters, sort) {
             })
         }
 
-        return cleanedHotelList;
+        return { data: cleanedHotelList };
     
 }
 
