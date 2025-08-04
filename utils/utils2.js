@@ -44,6 +44,11 @@ async function ascendaApiCaller(api_no, reqParams) {
       data = await poller(targetUrl);
     } else if (api_no === 2) {
       const response = await fetch(targetUrl);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       data = await response.json();
     }
     return data;
