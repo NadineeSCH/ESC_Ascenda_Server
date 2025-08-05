@@ -6,7 +6,7 @@ jest.mock("../../utils/utils.js", () => ({
 }))
 const { poller } = require("../../utils/utils.js");
 
-const { ascendaApiBuilder, ascendaApiCaller } = require("../../utils/utils2.js")
+const { ascendaApiBuilder, ascendaApiCaller, safeAssign } = require("../../utils/utils2.js")
 
 const mockReqParams = {
     var1 : 'bar',
@@ -115,3 +115,39 @@ describe("ascendaApicCaller tests", () => {
     })
 
 })
+
+describe("safeAssign", () => {
+    test("returns null for undefined", () => {
+        expect(safeAssign(undefined)).toBeNull();
+    });
+
+    test("returns null for null", () => {
+        expect(safeAssign(null)).toBeNull();
+    });
+
+    test("returns null for empty string", () => {
+        expect(safeAssign("")).toBeNull();
+    });
+
+    test("returns original value for 0", () => {
+        expect(safeAssign(0)).toBe(0);
+    });
+
+    test("returns original value for false", () => {
+        expect(safeAssign(false)).toBe(false);
+    });
+
+    test("returns original value for non-empty string", () => {
+        expect(safeAssign("hello")).toBe("hello");
+    });
+
+    test("returns original value for object", () => {
+        const obj = { a: 1 };
+        expect(safeAssign(obj)).toBe(obj);
+    });
+
+    test("returns original value for array", () => {
+        const arr = [1, 2, 3];
+        expect(safeAssign(arr)).toBe(arr);
+    });
+});
