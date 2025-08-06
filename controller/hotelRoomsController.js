@@ -44,7 +44,7 @@ async function getRoomDetails(req, res, next) {
   }
   
   try {
-    res.set("Access-Control-Allow-Origin", "http://localhost:5000");
+    res.set("Access-Control-Allow-Origin", "http://localhost:5001");
     const result = await hotelRoomsService.getRoomDetails(req.body);
     if (result.success) {
       res.json(result.data);
