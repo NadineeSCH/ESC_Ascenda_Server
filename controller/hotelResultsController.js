@@ -3,7 +3,9 @@ const hotelResultsService = require('../service/hotelResultsService.js');
 
 async function getSearchResults(req, res, next) {
 
-    if (!req.body || Object.keys(req.body).length === 0) {
+    let body = req.body;
+
+    if (!body || Object.keys(body).length === 0) {
         return res.status(400).json({
             error: "Empty JSON Body",
             message: "Please provide a proper JSON body",
@@ -13,22 +15,41 @@ async function getSearchResults(req, res, next) {
         });
     }
 
-    // Checking if basic fields are missing
-    const requiredFields = ["destination_id", "checkin", "checkout", "lang", "currency", "guestsEachRoom", "rooms", "sort_exist", "filter_exist"]
-    for (const field of requiredFields) {
-        if (req.body[field] === undefined || req.body[field] === null || req.body[field] === '') {
+    const requiredFields = {
+        destination_id: 'string',
+        checkin: 'string',
+        checkout: 'string',
+        lang: 'string',
+        currency: 'string',
+        guestsEachRoom: ['string', 'number'],
+        rooms: ['string', 'number'],
+        sort_exist: 'boolean',
+        filter_exist: 'boolean'
+    };
+
+    for (const [field, expectedType] of Object.entries(requiredFields)) {
+        const value = body[field];
+
+        const isMissing = value === undefined || value === null || value === '';
+        const isInvalidType = Array.isArray(expectedType)
+            ? !expectedType.includes(typeof value)
+            : typeof value !== expectedType;
+
+        if (isMissing || isInvalidType) {
             return res.status(400).json({
-                error: `Missing ${field}`,
-                message: `Please add ${field} to the JSON body`,
+                error: `Invalid or missing ${field}`,
+                message: `Field ${field} must be of type ${expectedType}`,
                 details: {
                     endpoint: "hotelResultsController",
+                    actualType: typeof value,
+                    received: value
                 }
             });
         }
     }
 
-    const checkinDate = new Date(req.body.checkin);
-    const checkoutDate = new Date(req.body.checkout);
+    const checkinDate = new Date(body.checkin);
+    const checkoutDate = new Date(body.checkout);
 
     // Check if dates are valid
     if (isNaN(checkinDate.getTime())) {
@@ -81,9 +102,64 @@ async function getSearchResults(req, res, next) {
         });
     }
 
-    //--------actual processing--------//
 
-    const body = req.body
+    // optional: validate sort params if present
+    let sort;
+    if (body.sort_exist) {
+        const { sort_var, reverse } = body;
+        if (typeof sort_var !== 'string' || (typeof reverse !== 'number' && typeof reverse !== 'boolean')) {
+            return res.status(400).json({
+                error: "Invalid sort parameters",
+                message: "If sort_exist is true, sort_var must be string and reverse must be number or boolean",
+                details: {
+                    endpoint: "hotelResultsController"
+                }
+            });
+        } else {
+            sort = new dto.sortParams({ sort_var: sort_var, reverse: reverse })
+        }
+    } else {
+        sort = null;
+    }
+
+
+    let filters;
+    // optional: validate filter params if present
+    if (body.filter_exist) {
+        const filters_body = body.filters;
+
+        if (typeof filters_body !== 'object' || filters_body === null) {
+            return res.status(400).json({
+                error: "Missing or invalid filters",
+                message: "If filter_exist is true, filters must be an object",
+                details: {
+                    endpoint: "hotelResultsController"
+                }
+            });
+        }
+
+        const numericFields = ["minPrice", "maxPrice", "minRating", "maxRating", "minScore", "maxScore"];
+        for (const key of numericFields) {
+            const val = filters_body[key];
+            if (val !== null && typeof val !== "number") {
+                return res.status(400).json({
+                    error: `Invalid type for filters.${key}`,
+                    message: `filters.${key} must be a number or null`,
+                    details: {
+                        endpoint: "hotelResultsController",
+                        received: val
+                    }
+                });
+            }
+        }
+
+        filters = new dto.filterParams(filters_body)
+    } else {
+        filters = null;
+    }
+
+
+    //--------ReqParams31 and ReqParams32 processing--------//
 
     const reqParams31 = new dto.ReqParam31({
         destination_id: body.destination_id,
@@ -103,22 +179,7 @@ async function getSearchResults(req, res, next) {
     guests += guestsEachRoom; // process guests to the desired format
     reqParams31.guests = guests;
 
-    const reqParams32 = new dto.ReqParam32({ destination_id: req.body.destination_id });
-
-    let sort;
-    if (body.sort_exist) {
-        sort = new dto.sortParams({ sort_var: body.sort_var, reverse: body.reverse })
-    } else {
-        sort = null;
-    }
-
-    let filters;
-    if (body.filter_exist) {
-        filters = new dto.filterParams(body.filters)
-    } else {
-        filters = null;
-    }
-
+    const reqParams32 = new dto.ReqParam32({ destination_id: body.destination_id });
 
     try {
         const searchResult = await hotelResultsService.processSearchResults(reqParams31, reqParams32, filters, sort);
