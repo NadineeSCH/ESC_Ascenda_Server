@@ -57,9 +57,19 @@ describe("combinedHotelDataRouter Integration Tests", () => {
     checkin: "", // Will be set dynamically in beforeAll
     checkout: "", // Will be set dynamically in beforeAll
     currency: "SGD",
-    guestsEachRoom: 2,
-    rooms: 1,
+    guestsEachRoom: "2",
+    rooms: "1",
   };
+
+  const fields = [
+    "hotel_id",
+    "destination_id",
+    "checkin",
+    "checkout",
+    "currency",
+    "guestsEachRoom",
+    "rooms",
+  ];
 
   // Update the request body with dynamic dates before each test
   beforeEach(() => {
@@ -216,17 +226,62 @@ describe("combinedHotelDataRouter Integration Tests", () => {
       });
     });
 
-    it("should validate required fields", async () => {
-      const invalidRequestBody = {
-        hotel_id: "diH7",
-        // Missing required fields
-      };
+    test.each(fields)(
+      "should return status 400 and indicate for missing field %p",
+      async (missingField) => {
+        const invalidRequestBody = { ...validRequestBody };
+        delete invalidRequestBody[missingField]; // Remove required field
 
-      const response = await request(app).post("/").send(invalidRequestBody);
+        const response = await request(app).post("/").send(invalidRequestBody);
 
-      expect(response.status).toBe(400);
-      expect(response.body.error).toContain("Missing");
-    });
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({
+          error: `Missing or invalid ${missingField}`,
+          message: `Please add a valid string value for ${missingField} to the JSON body`,
+          details: {
+            endpoint: "combinedHotelDataController",
+          },
+        });
+      }
+    );
+
+    test.each(fields)(
+      "should return status 400 and indicate for undefined field %p",
+      async (missingField) => {
+        const invalidRequestBody = { ...validRequestBody };
+        invalidRequestBody[missingField] = undefined; // set field to undefined
+
+        const response = await request(app).post("/").send(invalidRequestBody);
+
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({
+          error: `Missing or invalid ${missingField}`,
+          message: `Please add a valid string value for ${missingField} to the JSON body`,
+          details: {
+            endpoint: "combinedHotelDataController",
+          },
+        });
+      }
+    );
+
+    test.each(fields)(
+      "should return status 400 and indicate for invalid type field %p",
+      async (missingField) => {
+        const invalidRequestBody = { ...validRequestBody };
+        invalidRequestBody[missingField] = 1; // set field to integer value (invalid type)
+
+        const response = await request(app).post("/").send(invalidRequestBody);
+
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({
+          error: `Missing or invalid ${missingField}`,
+          message: `Please add a valid string value for ${missingField} to the JSON body`,
+          details: {
+            endpoint: "combinedHotelDataController",
+          },
+        });
+      }
+    );
 
     it("should validate date constraints", async () => {
       const invalidDateBody = {
@@ -235,8 +290,8 @@ describe("combinedHotelDataRouter Integration Tests", () => {
         checkin: invalidEarlyCheckinDate, // Less than 3 days from today
         checkout: validCheckoutDate,
         currency: "SGD",
-        guestsEachRoom: 2,
-        rooms: 1,
+        guestsEachRoom: "2",
+        rooms: "1",
       };
 
       const response = await request(app).post("/").send(invalidDateBody);
@@ -259,8 +314,8 @@ describe("combinedHotelDataRouter Integration Tests", () => {
         checkin: validCheckinDate, // Valid checkin date
         checkout: invalidCheckoutBeforeCheckinDate, // Before checkin
         currency: "SGD",
-        guestsEachRoom: 2,
-        rooms: 1,
+        guestsEachRoom: "2",
+        rooms: "1",
       };
 
       const response = await request(app).post("/").send(invalidDateBody);
