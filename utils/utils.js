@@ -1,6 +1,5 @@
 const axios = require("axios");
 const querystring = require("querystring");
-const fetch = require('node-fetch');
 
 // ------------ poller fn -------------------- //
 async function poller(targetUrl) {
