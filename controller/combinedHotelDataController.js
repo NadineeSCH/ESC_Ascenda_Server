@@ -16,10 +16,10 @@ async function getCombinedHotelData(req, res, next) {
   // Checks if JSON request is invalid for hotelDetailsService and hotelRoomsService
   const requiredFields = ["hotel_id", "destination_id", "checkin", "checkout", "currency", "guestsEachRoom", "rooms"]
   for (const field of requiredFields) {
-    if (req.body[field] === undefined || req.body[field] === null || req.body[field] === ''){
+    if (req.body[field] === undefined || req.body[field] === null || req.body[field] === '' || typeof req.body[field] !== 'string') {
       return res.status(400).json({
-        error: `Missing ${field}`,
-        message: `Please add ${field} to the JSON body`,
+        error: `Missing or invalid ${field}`,
+        message: `Please add a valid string value for ${field} to the JSON body`,
         details: {
           endpoint: "combinedHotelDataController",
         }
