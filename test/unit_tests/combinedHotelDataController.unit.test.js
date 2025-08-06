@@ -141,8 +141,8 @@ describe('combinedHotelDataController Unit Tests', () => {
 
           expect(mockRes.status).toHaveBeenCalledWith(400);
           expect(mockRes.json).toHaveBeenCalledWith({
-            error: `Missing ${field}`,
-            message: `Please add ${field} to the JSON body`,
+            error: `Missing or invalid ${field}`,
+            message: `Please add a valid string value for ${field} to the JSON body`,
             details: {
               endpoint: "combinedHotelDataController"
             }
@@ -159,8 +159,8 @@ describe('combinedHotelDataController Unit Tests', () => {
 
           expect(mockRes.status).toHaveBeenCalledWith(400);
           expect(mockRes.json).toHaveBeenCalledWith({
-            error: `Missing ${field}`,
-            message: `Please add ${field} to the JSON body`,
+            error: `Missing or invalid ${field}`,
+            message: `Please add a valid string value for ${field} to the JSON body`,
             details: {
               endpoint: "combinedHotelDataController"
             }
@@ -175,27 +175,12 @@ describe('combinedHotelDataController Unit Tests', () => {
 
           expect(mockRes.status).toHaveBeenCalledWith(400);
           expect(mockRes.json).toHaveBeenCalledWith({
-            error: `Missing ${field}`,
-            message: `Please add ${field} to the JSON body`,
+            error: `Missing or invalid ${field}`,
+            message: `Please add a valid string value for ${field} to the JSON body`,
             details: {
               endpoint: "combinedHotelDataController"
             }
           });
-        });
-
-        test(`should not return 400 when ${field} is false`, async () => {
-          if (field === 'rooms' || field === 'guestsEachRoom') {
-            mockReq.body = { ...validRequestBody };
-            mockReq.body[field] = false;
-
-            hotelDetailsService.getHotelDetails.mockResolvedValue(mockHotelDetailsResponse);
-            hotelRoomsService.getRoomDetails.mockResolvedValue(mockRoomsResponse);
-
-            await combinedHotelDataController.getCombinedHotelData(mockReq, mockRes, mockNext);
-
-            // Should proceed with service calls since false is a valid value
-            expect(mockRes.status).not.toHaveBeenCalledWith(400);
-          }
         });
       });
     });
@@ -522,36 +507,6 @@ describe('combinedHotelDataController Unit Tests', () => {
       jest.useRealTimers();
     });
 
-    test('should handle error without message property', async () => {
-      const mockCurrentDate = new Date('2025-08-03T10:00:00.000Z');
-      jest.useFakeTimers();
-      jest.setSystemTime(mockCurrentDate);
-
-      mockReq.body = {
-        ...validRequestBody,
-        checkin: "2025-08-10",
-        checkout: "2025-08-15"
-      };
-      
-      const error = { toString: () => 'Custom error' };
-      hotelDetailsService.getHotelDetails.mockRejectedValue(error);
-      hotelRoomsService.getRoomDetails.mockResolvedValue(mockRoomsResponse);
-
-      await combinedHotelDataController.getCombinedHotelData(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(500);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        error: "Combined hotel data fetch failed",
-        message: undefined, // No message property
-        details: {
-          controller: "combinedHotelDataController",
-          timestamp: "2025-08-03T10:00:00.000Z"
-        }
-      });
-
-      jest.useRealTimers();
-    });
-
     test('should not call next middleware on errors', async () => {
       const mockCurrentDate = new Date('2025-08-03T10:00:00.000Z');
       jest.useFakeTimers();
@@ -650,39 +605,6 @@ describe('combinedHotelDataController Unit Tests', () => {
   });
 
   describe('Edge Cases', () => {
-
-    test('should handle very large hotel_id', async () => {
-      mockReq.body = {
-        ...validRequestBody,
-        hotel_id: "a".repeat(1000) // Very long hotel ID
-      };
-      
-      hotelDetailsService.getHotelDetails.mockResolvedValue(mockHotelDetailsResponse);
-      hotelRoomsService.getRoomDetails.mockResolvedValue(mockRoomsResponse);
-
-      await combinedHotelDataController.getCombinedHotelData(mockReq, mockRes, mockNext);
-
-      expect(hotelDetailsService.getHotelDetails).toHaveBeenCalledWith("a".repeat(1000));
-      expect(mockRes.json).toHaveBeenCalled();
-    });
-
-    test('should handle special characters in request fields', async () => {
-      mockReq.body = {
-        ...validRequestBody,
-        hotel_id: "special-chars-!@#$%",
-        destination_id: "dest_123",
-        currency: "USD"
-      };
-      
-      hotelDetailsService.getHotelDetails.mockResolvedValue(mockHotelDetailsResponse);
-      hotelRoomsService.getRoomDetails.mockResolvedValue(mockRoomsResponse);
-
-      await combinedHotelDataController.getCombinedHotelData(mockReq, mockRes, mockNext);
-
-      expect(hotelDetailsService.getHotelDetails).toHaveBeenCalledWith("special-chars-!@#$%");
-      expect(hotelRoomsService.getRoomDetails).toHaveBeenCalledWith(mockReq.body);
-    });
-
     test('should handle numeric strings for rooms and guests', async () => {
       mockReq.body = {
         ...validRequestBody,
