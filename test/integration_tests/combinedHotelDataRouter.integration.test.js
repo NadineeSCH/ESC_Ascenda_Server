@@ -246,10 +246,29 @@ describe("combinedHotelDataRouter Integration Tests", () => {
     );
 
     test.each(fields)(
-      "should return status 400 and indicate for undefined field %p",
+      "should return status 400 and indicate for null field %p",
       async (missingField) => {
         const invalidRequestBody = { ...validRequestBody };
-        invalidRequestBody[missingField] = undefined; // set field to undefined
+        invalidRequestBody[missingField] = null; // set field to null
+
+        const response = await request(app).post("/").send(invalidRequestBody);
+
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({
+          error: `Missing or invalid ${missingField}`,
+          message: `Please add a valid string value for ${missingField} to the JSON body`,
+          details: {
+            endpoint: "combinedHotelDataController",
+          },
+        });
+      }
+    );
+
+    test.each(fields)(
+      "should return status 400 and indicate for empty string field %p",
+      async (missingField) => {
+        const invalidRequestBody = { ...validRequestBody };
+        invalidRequestBody[missingField] = ""; // set field to empty string
 
         const response = await request(app).post("/").send(invalidRequestBody);
 
