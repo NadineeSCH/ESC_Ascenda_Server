@@ -23,7 +23,7 @@ const mockNext = () => { return jest.fn(); };
 
 
 const validBody = {
-  destination_id: 'cCrl',
+  destination_id: 'RsBu',
   checkin: '2025-08-04',
   checkout: '2025-08-06',
   lang: 'en_US',
@@ -151,6 +151,22 @@ describe("hotelResultsController test", () => {
 
 
         test('returns 400 if sort_var missing when sort_exist is true', async () => {
+            const invalidBody = JSON.parse(JSON.stringify(validBody));
+            delete invalidBody.sort_var;
+
+            const req = mockReq(invalidBody);
+            const res = mockRes();
+            const next = mockNext();
+
+            await getSearchResults(req, res, next);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+                error: 'Invalid sort parameters'
+            }));
+        });
+
+        test('returns 400 if sort_var is of wrong type (sort_exist = true)', async () => {
             const invalidBody = JSON.parse(JSON.stringify(validBody));
             delete invalidBody.sort_var;
 

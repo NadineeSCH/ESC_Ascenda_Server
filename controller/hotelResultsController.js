@@ -115,9 +115,19 @@ async function getSearchResults(req, res, next) {
                     endpoint: "hotelResultsController"
                 }
             });
-        } else {
-            sort = new dto.sortParams({ sort_var: sort_var, reverse: reverse })
+        } 
+        if (['price', 'rating', 'score'].includes(sort_var) === false) {
+            return res.status(400).json({
+                error: "Invalid sort_var parameter",
+                message: "sort_var is not 'price', 'rating' or 'score'",
+                details: {
+                    endpoint: "hotelResultsController"
+                }
+            });
         }
+
+        sort = new dto.sortParams({ sort_var: sort_var, reverse: reverse })
+
     } else {
         sort = null;
     }
