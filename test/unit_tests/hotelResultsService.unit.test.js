@@ -7,7 +7,7 @@ jest.mock('../../utils/utils2.js', () => {
     };
 });
 
-const { processSearchResults } = require('../../service/hotelResultsService');
+const { processSearchResults } = require('../../service/hotelResultsService.js');
 const { ascendaApiCaller, safeAssign } = require('../../utils/utils2.js');
 const mockApis = require('../mocks/hotel3132ApiMocks.js');
 const mockSuccessResp31 = mockApis.mockPriceList;
