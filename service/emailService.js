@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.ethereal.email',
+  host: "smtp.ethereal.email",
   port: 587,
   auth: {
     user: process.env.EMAIL_SENDER,
@@ -10,12 +10,19 @@ const transporter = nodemailer.createTransport({
 });
 
 exports.sendOtp = async (email, otp) => {
-  const info = await transporter.sendMail({
-    from: `"Hotel Booking App" <${process.env.EMAIL_SENDER}>`,
-    to: email,
-    subject: "Your OTP Code",
-    text: `Your OTP code is: ${otp}`,
-  });
+  if (!email || !otp) {
+    throw new Error("Email and OTP are required");
+  }
+  try {
+    const info = await transporter.sendMail({
+      from: `"Hotel Booking App" <${process.env.EMAIL_SENDER}>`,
+      to: email,
+      subject: "Your OTP Code",
+      text: `Your OTP code is: ${otp}`,
+    });
 
-  console.log("Message sent: %s", info.messageId);
+    console.log("Message sent: %s", info.messageId);
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
