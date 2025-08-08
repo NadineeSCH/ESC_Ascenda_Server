@@ -67,3 +67,7 @@ exports.verifyOtp = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
+//UNDO COMMENT BEFORE TESTING
+
+//exports.tempUsers = tempUsers; // Export the tempUsers map for testing
