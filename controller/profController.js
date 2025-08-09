@@ -1,8 +1,8 @@
-const profService = require('../service/profService');
+const profService = require('../services/profService');
 
 exports.getProfile = async (req, res) => {
   try {
-    const profile = await profService.getProfile(req.user.userId);
+    const profile = await profService.getProfile(req.user._id);
     res.json(profile);
   } catch (err) {
     res.status(404).json({ error: err.message });
@@ -12,7 +12,7 @@ exports.getProfile = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   try {
     const updatedProfile = await profService.updateProfile(
-      req.user.userId,
+      req.user._id,
       req.user.stripeCustomerId,
       req.body
     );
@@ -33,15 +33,12 @@ exports.getPurchaseHistory = async (req, res) => {
 
 exports.deleteAccount = async (req, res) => {
   try {
-    const result = await profService.deleteAccount(
-      req.user.userId,
-      req.user.stripeCustomerId
-    );
-    res.json(result);
+    await profService.deleteAccount(req.user._id, req.user.stripeCustomerId);
+    res.json({ message: 'Account deleted successfully' });
   } catch (err) {
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Account deletion failed',
-      details: err.message 
+      details: err.message
     });
   }
 };
