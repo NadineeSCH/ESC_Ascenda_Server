@@ -68,11 +68,11 @@ console.log("Running from", __dirname);
 // Auth & payments
 const authRoutes = require("./routes/authRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
-const profileRoutes = require("./routes/profRoutes");
+const profRoutes = require("./routes/profRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/payments", paymentRoutes);
-app.use("/api/profile", profileRoutes);
+app.use("/api/profile", profRoutes);
 
 // Hotel APIs
 const hotelRoomsRouter = require("./routes/hotelRoomsRouter");
