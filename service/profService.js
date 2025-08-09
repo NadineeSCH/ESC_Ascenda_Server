@@ -2,33 +2,35 @@ const User = require("../models/User");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 exports.getProfile = async (userId) => {
-  const user = await User.findById(userId)
-    .select('-password -__v -createdAt -updatedAt');
+  const user = await User.findById(userId).select('-password -__v -createdAt -updatedAt');
   if (!user) throw new Error('User not found');
   return user;
 };
 
 exports.updateProfile = async (userId, stripeCustomerId, updates) => {
-  // Prevent unauthorized updates
   const allowedUpdates = ['name', 'email', 'phone', 'address'];
-  const invalidUpdates = Object.keys(updates).filter(
+  const invalidFields = Object.keys(updates).filter(
     field => !allowedUpdates.includes(field)
   );
-
-  if (invalidUpdates.length > 0) {
-    throw new Error(`Invalid fields: ${invalidUpdates.join(', ')}`);
+  if (invalidFields.length > 0) {
+    throw new Error(`Invalid fields: ${invalidFields.join(', ')}`);
   }
 
-  // Update Stripe customer if contact info changes
-  if (updates.email || updates.phone || updates.address) {
-    await stripe.customers.update(stripeCustomerId, {
-      email: updates.email,
-      phone: updates.phone,
-      address: updates.address ? { line1: updates.address } : undefined
-    });
+  // Prepare Stripe update payload
+  const stripePayload = {};
+  if (updates.email) stripePayload.email = updates.email;
+  if (updates.phone) stripePayload.phone = updates.phone;
+  if (updates.address) {
+    stripePayload.address = typeof updates.address === 'object'
+      ? updates.address
+      : { line1: updates.address };
   }
 
-  // Update database
+  if (Object.keys(stripePayload).length > 0) {
+    await stripe.customers.update(stripeCustomerId, stripePayload);
+  }
+
+  // Update MongoDB
   return await User.findByIdAndUpdate(
     userId,
     updates,
@@ -37,37 +39,34 @@ exports.updateProfile = async (userId, stripeCustomerId, updates) => {
 };
 
 exports.getPurchaseHistory = async (stripeCustomerId) => {
-  const charges = await stripe.charges.list({
-    customer: stripeCustomerId,
-    limit: 100
-  });
+  try {
+    const charges = await stripe.charges.list({
+      customer: stripeCustomerId,
+      limit: 100,
+      expand: ['data.invoice'] // Optional: expand related objects
+    });
 
-  return charges.data.map(charge => ({
-    id: charge.id,
-    amount: charge.amount / 100,
-    currency: charge.currency,
-    created: new Date(charge.created * 1000),
-    description: charge.description || 'Hotel Booking',
-    receipt_url: charge.receipt_url
-  }));
+    return charges.data.map(charge => ({
+      id: charge.id,
+      amount: charge.amount, 
+      currency: charge.currency,
+      created: new Date(charge.created * 1000), // Convert timestamp to Date
+      description: charge.description || 'Payment',
+      status: charge.status,
+      receipt_url: charge.receipt_url,
+    }));
+    
+  } catch (err) {
+    console.error('Stripe API error:', err);
+    throw new Error('Failed to retrieve purchase history');
+  }
 };
 
 exports.deleteAccount = async (userId, stripeCustomerId) => {
-  // Cancel any active subscriptions first
-  const subscriptions = await stripe.subscriptions.list({
-    customer: stripeCustomerId
-  });
-  await Promise.all(
-    subscriptions.data.map(sub => 
-      stripe.subscriptions.del(sub.id)
-    )
-  );
 
-  // Then delete the customer
+  // Delete Stripe customer
   await stripe.customers.del(stripeCustomerId);
 
-  // Finally delete the user
+  // Delete user from MongoDB
   await User.findByIdAndDelete(userId);
-
-  return { success: true };
 };
