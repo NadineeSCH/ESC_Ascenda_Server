@@ -41,7 +41,12 @@ exports.signup = async ({ name, email, phone, password, address }) => {
 exports.login = async ({ email, password }) => {
   const user = await User.findOne({ email });
   if (!email || !password) throw new Error("Email and password are required");
+  if (typeof email !== "string" || typeof password !== "string") {
+    throw new Error("Email and password must be strings");
+  }
   if (!user) throw new Error("Invalid email or password");
+
+  console.log("passwords debug", password, user.password);
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error("Invalid email or password");

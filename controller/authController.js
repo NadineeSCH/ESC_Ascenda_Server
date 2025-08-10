@@ -2,29 +2,61 @@ const authService = require("../service/authService");
 const { authenticator } = require("otplib");
 const emailService = require("../service/emailService");
 const validate = require("../service/validate");
-const crypto = require('crypto');
+const crypto = require("crypto");
+const { type } = require("os");
 
 const tempUsers = new Map(); // Replace with Redis if needed
 
-setInterval(() => {
+const performCleaning = () =>{
   for (const [email, tempUser] of tempUsers) {
     if (tempUser.expiresAt < Date.now()) {
       tempUsers.delete(email);
     }
   }
-}, 300000); //5min
+}
+const cleanupInterval=setInterval(() => performCleaning, 300000); //5min
+
+const cleanup = () => {
+  clearInterval(cleanupInterval);
+  tempUsers.clear();
+};
 
 exports.signup = async (req, res) => {
-  const { name, email, phone, password, address } = req.body;
-
   try {
+    const { name, email, phone, password, address } = req.body;
+
+    //check for missing fields, null values, or wrong types
+    if (!name || !email || !phone || !password || !address) {
+      throw new Error(
+        "All fields (name, email, phone, password, address) are required"
+      );
+    }
+
+    if (
+      typeof name !== "string" ||
+      typeof email !== "string" ||
+      typeof phone !== "string" ||
+      typeof password !== "string" ||
+      typeof address !== "string"
+    ) {
+      throw new Error("All fields must be strings");
+    }
+
     await validate.validator({ name, phone, password });
-    
+
     // const otp = crypto.randomInt(100000, 999999).toString(); // Random 6-digit number
-    authenticator.generate = () => "1234"; 
+    authenticator.generate = () => "1234";
     const otp = authenticator.generate("any_secret"); //forcing it to be always be 1234
     const OTP_EXPIRY = 300000; //5 mins in miliseconds
-    tempUsers.set(email, { name, email, phone, password, address, otp, expiresAt: Date.now() + OTP_EXPIRY });
+    tempUsers.set(email, {
+      name,
+      email,
+      phone,
+      password,
+      address,
+      otp,
+      expiresAt: Date.now() + OTP_EXPIRY,
+    });
 
     try {
       await emailService.sendOtp(email, otp);
@@ -51,6 +83,17 @@ exports.login = async (req, res) => {
 
 exports.verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
+
+  //validate all inputs
+  if (!email || !otp) {
+    return res.status(400).json({ message: "Email and OTP are required" });
+  }
+
+  if (typeof email !== "string" || typeof otp !== "string") {
+    return res.status(400).json({ message: "Email and OTP must be strings" });
+  }
+
+
   const tempUser = tempUsers.get(email);
 
   if (!tempUser || tempUser.otp !== otp) {
@@ -71,12 +114,15 @@ exports.verifyOtp = async (req, res) => {
     });
 
     tempUsers.delete(email);
-    res.status(201).json({ message: "User verified and account created", user });
+    res
+      .status(201)
+      .json({ message: "User verified and account created", user });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
 
 //UNDO COMMENT BEFORE TESTING
-
-exports.tempUsers = tempUsers; // Export the tempUsers map for testing
+// exports.tempUsers = tempUsers; // Export the tempUsers map for testing
+// exports.cleanup = cleanup; // Export the cleanup function for testing
+// exports.performCleaning = performCleaning; // Export the performCleaning function for testing
