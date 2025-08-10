@@ -44,6 +44,7 @@ exports.login = async (req, res) => {
     const result = await authService.login(req.body);
     res.json({ message: "Login successful", ...result });
   } catch (err) {
+    console.error("Full error object:", err);
     res.status(400).json({ error: err.message });
   }
 };
