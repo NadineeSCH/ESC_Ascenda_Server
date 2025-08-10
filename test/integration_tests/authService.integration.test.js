@@ -101,4 +101,52 @@ describe('AuthService Integration Tests', () => {
       })).rejects.toThrow('Invalid email or password');
     });
   });
+  describe('signup edge cases', () => {
+  it('should throw error if any required field is missing', async () => {
+    const incompleteUserDataSets = [
+      { email: 'a@b.com', phone: '1234', password: 'pass', address: 'addr' }, // missing name
+      { name: 'Name', phone: '1234', password: 'pass', address: 'addr' }, // missing email
+      { name: 'Name', email: 'a@b.com', password: 'pass', address: 'addr' }, // missing phone
+      { name: 'Name', email: 'a@b.com', phone: '1234', address: 'addr' }, // missing password
+      { name: 'Name', email: 'a@b.com', phone: '1234', password: 'pass' } // missing address
+    ];
+
+    for (const data of incompleteUserDataSets) {
+      await expect(authService.signup(data)).rejects.toThrow(
+        /All fields \(name, email, phone, password, address\) are required/
+      );
+    }
+  });
+});
+
+    describe('login edge cases', () => {
+    it('should throw error if email or password is missing', async () => {
+        await expect(authService.login({ email: '', password: 'somepass' })).rejects.toThrow(
+        'Email and password are required'
+        );
+
+        await expect(authService.login({ email: 'a@b.com', password: '' })).rejects.toThrow(
+        'Email and password are required'
+        );
+
+        await expect(authService.login({})).rejects.toThrow('Email and password are required');
+    });
+
+    it('should throw error if password is incorrect', async () => {
+        const hashedPassword = await bcrypt.hash('correctpassword', 10);
+        await User.create({
+        name: 'Wrong Pass',
+        email: 'wrongpass@example.com',
+        phone: '12345678',
+        password: hashedPassword,
+        address: '123 Main St',
+        stripeCustomerId: 'cus_test_123'
+        });
+
+        await expect(
+        authService.login({ email: 'wrongpass@example.com', password: 'incorrectpassword' })
+        ).rejects.toThrow('Invalid email or password');
+    });
+    });
+
 });
