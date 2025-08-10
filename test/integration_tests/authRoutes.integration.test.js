@@ -3,6 +3,7 @@ const request = require("supertest");
 const { connectDB, disconnectDB, clearDB } = require("../setup/testDb");
 const authRoutes = require("../../routes/authRoutes");
 const User = require("../../models/User");
+const { tempUsers } = require("../../controller/authController");
 
 
 // Mock email service to avoid sending real emails
@@ -194,7 +195,7 @@ describe("Auth Routes Integration", () => {
   it("should only accept the last OTP sent if multiple signups before verify", async () => {
     await signupUser();
     // Change OTP to 5678 manually for the same email
-    const { tempUsers } = require("../../controller/authController");
+    
     tempUsers.set(validUser.email, {
       ...tempUsers.get(validUser.email),
       otp: "5678",

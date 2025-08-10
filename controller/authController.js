@@ -78,4 +78,4 @@ exports.verifyOtp = async (req, res) => {
 
 //UNDO COMMENT BEFORE TESTING
 
-//exports.tempUsers = tempUsers; // Export the tempUsers map for testing
+exports.tempUsers = tempUsers; // Export the tempUsers map for testing

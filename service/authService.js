@@ -29,7 +29,7 @@ exports.signup = async ({ name, email, phone, password, address }) => {
   });
 
   return {
-    id: user._id,
+    _id: user._id,
     name: user.name,
     email: user.email,
     phone: user.phone,

@@ -7,6 +7,10 @@
     "test": "jest",
     "start": "node ./server.js"
   },
+  "jest": {
+    "setupFilesAfterEnv": ["<rootDir>/test/setup/jest.setup.js"],
+    "testEnvironment": "node"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
