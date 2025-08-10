@@ -6,6 +6,14 @@ const crypto = require('crypto');
 
 const tempUsers = new Map(); // Replace with Redis if needed
 
+setInterval(() => {
+  for (const [email, tempUser] of tempUsers) {
+    if (tempUser.expiresAt < Date.now()) {
+      tempUsers.delete(email);
+    }
+  }
+}, 300000); //5min
+
 exports.signup = async (req, res) => {
   const { name, email, phone, password, address } = req.body;
 
