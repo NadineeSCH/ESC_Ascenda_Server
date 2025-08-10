@@ -7,13 +7,14 @@ const { type } = require("os");
 
 const tempUsers = new Map(); // Replace with Redis if needed
 
-const cleanupInterval=setInterval(() => {
+const performCleaning = () =>{
   for (const [email, tempUser] of tempUsers) {
     if (tempUser.expiresAt < Date.now()) {
       tempUsers.delete(email);
     }
   }
-}, 300000); //5min
+}
+const cleanupInterval=setInterval(() => performCleaning, 300000); //5min
 
 const cleanup = () => {
   clearInterval(cleanupInterval);
@@ -121,5 +122,6 @@ exports.verifyOtp = async (req, res) => {
 };
 
 //UNDO COMMENT BEFORE TESTING
-exports.tempUsers = tempUsers; // Export the tempUsers map for testing
-exports.cleanup = cleanup; // Export the cleanup function for testing
+// exports.tempUsers = tempUsers; // Export the tempUsers map for testing
+// exports.cleanup = cleanup; // Export the cleanup function for testing
+// exports.performCleaning = performCleaning; // Export the performCleaning function for testing
