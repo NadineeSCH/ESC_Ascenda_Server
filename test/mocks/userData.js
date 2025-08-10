@@ -22,6 +22,21 @@ const validUserData3 = {
   address: '789 Marina Bay, Singapore'
 };
 
+const emailOtp = {
+  valid:{
+  email: 'john@example.com',
+  otp: '1234'
+  },
+  invalidEmail: {
+    email: 'invalid-email',
+    otp: '1234'
+  },
+  invalidOtp: {
+    email: 'john@example.com',
+    otp: 'wrong-otp'
+  }
+};
+
 const invalidUserDataSets = {
   missingName: {
     email: 'test@example.com',
@@ -60,6 +75,13 @@ const invalidUserDataSets = {
     password: 'ValidPass123!',
     address: '   '
   },
+  invalidName: {
+    name: 'T',
+    email: 'test@example.com',
+    phone: '91234567',
+    password: 'ValidPass123!',
+    address: '123 Test Street'
+  },
   invalidPhone: {
     name: 'Test User',
     email: 'test@example.com',
@@ -73,7 +95,14 @@ const invalidUserDataSets = {
     phone: '9123456', // Invalid: only 7 digits
     password: 'ValidPass123!',
     address: '123 Test Street'
-  }
+  },
+  invalidPassword: {
+    name: 'Test User',
+    email: 'test@example.com',
+    phone: '91234567',
+    password: 'alllowercase', // Invalid: no uppercase, no number
+    address: '123 Test Street'
+  },
 };
 
 const mockStripeCustomer = {
@@ -149,6 +178,7 @@ module.exports = {
   validUserData,
   validUserData2,
   validUserData3,
+  emailOtp,
   invalidUserDataSets,
   mockStripeCustomer,
   mockStripeErrors,
