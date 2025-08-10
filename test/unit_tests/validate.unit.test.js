@@ -1,5 +1,5 @@
 // tests/services/validate.test.js
-const validate = require('../../services/validate');
+const validate = require('../../service/validate');
 
 describe('Validate Service', () => {
   describe('validator', () => {
