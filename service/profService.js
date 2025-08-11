@@ -54,6 +54,7 @@ exports.getPurchaseHistory = async (stripeCustomerId) => {
       description: charge.description || 'Payment',
       status: charge.status,
       receipt_url: charge.receipt_url,
+      data: charge.metadata
     }));
     
   } catch (err) {
