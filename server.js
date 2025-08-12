@@ -43,21 +43,13 @@ app.use("/api/profile", profileLimiter);
 app.use(cors({ origin: "http://localhost:3000" })); // frontend CORS
 app.use(express.json());
 
-const mainDb = mongoose.createConnection(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-mainDb.on('connected', () => console.log('Main MongoDB connected'));
-mainDb.on('error', (err) => console.error('Main MongoDB connection error:', err));
-
-const cacheDb = mongoose.createConnection(process.env.CACHEMONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-cacheDb.on('connected', () => console.log('Cache MongoDB connected'));
-cacheDb.on('error', (err) => console.error('Cache MongoDB connection error:', err));
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
 // View engine
 app.set("view engine", "ejs");

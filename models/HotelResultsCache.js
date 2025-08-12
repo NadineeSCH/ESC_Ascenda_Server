@@ -34,4 +34,4 @@ hotelResultsSchema.index({
 // TTL auto-delete when now >= expireAt
 hotelResultsSchema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
 
-module.exports = mongoose.model('HotelResultsCache2', hotelResultsSchema, 'hotelresultscache');
+module.exports = mongoose.model('hotelresultscache', hotelResultsSchema );

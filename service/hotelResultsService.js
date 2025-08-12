@@ -56,6 +56,7 @@ async function processSearchResults(reqParams31, reqParams32, filters, sort) {
                 data1: data1,
                 data2: data2
             });
+            console.log("Successfully saved to cache");
 
         } catch (e) {
             console.warn('cache creation failed:', e?.message || e);
