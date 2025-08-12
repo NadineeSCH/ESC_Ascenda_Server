@@ -1,25 +1,72 @@
 let utils = require('../utils/utils2.js');
 let dto = require('../DTO/DTO.js');
+const hotelResultCache = require('../models/HotelResultsCache.js');
+
 const defaultImg = '1.jpg';
+const TTL_MS = 10 * 60 * 1000;
 
 async function processSearchResults(reqParams31, reqParams32, filters, sort) {
     let data1, data2;
 
-    
-    try {
-        data1 = await utils.ascendaApiCaller(1, reqParams31);
-        data2 = await utils.ascendaApiCaller(2, reqParams32);
-    } catch (error) {
-        throw new Error(`hotelResultsService.processSearchResults failed: ${error.message}`, { cause: error });
+    const q = JSON.parse(JSON.stringify({ ...reqParams31 }));
+    const now = new Date();
+    const freshCutoff = new Date(now.getTime() - TTL_MS);
+
+    // build a stable filter using the indexed fields
+    const cacheQueryObj = {
+        'reqParams.destination_id': q.destination_id ?? null,
+        'reqParams.hotel_id':       q.hotel_id ?? null,
+        'reqParams.checkin':        q.checkin ?? null,
+        'reqParams.checkout':       q.checkout ?? null,
+        'reqParams.lang':           q.lang ?? null,
+        'reqParams.currency':       q.currency ?? null,
+        'reqParams.guests':         q.guests ?? null,
+        'reqParams.partner_id':     q.partner_id ?? 1098
+    };
+
+    let result = await hotelResultCache
+    .findOne({ ...cacheQueryObj, cachedAt: { $gt: freshCutoff } })
+    .lean().catch((err) => {console.log(err);})
+
+    if (!result) {
+        console.log("Cache Miss");
+        
+        try {
+            [data1, data2] = await Promise.all([
+                utils.ascendaApiCaller(1, reqParams31),
+                utils.ascendaApiCaller(2, reqParams32),
+            ]);
+
+        } catch (error) {
+            throw new Error(`hotelResultsService.processSearchResults failed: ${error.message}`, { cause: error });
+        }
+
+        if (!data1?.hotels || !Array.isArray(data1.hotels)) {
+            throw new Error("Invalid hotel price list from data1.");
+        }
+
+        if (!Array.isArray(data2)) {
+            throw new Error("Invalid hotel static info list from data2.");
+        }
+
+        try {
+            await hotelResultCache.create({
+                expireAt: new Date(now.getTime() + TTL_MS),
+                reqParams: reqParams31,
+                data1: data1,
+                data2: data2
+            });
+
+        } catch (e) {
+            console.warn('cache creation failed:', e?.message || e);
+        }
+
+    } else {
+        console.log("Successfully retrieved from cache")
+        data1 = result.data1;
+        data2 = result.data2;
     }
 
-    if (!data1?.hotels || !Array.isArray(data1.hotels)) {
-        throw new Error("Invalid hotel price list from data1.");
-    }
-
-    if (!Array.isArray(data2)) {
-        throw new Error("Invalid hotel static info list from data2.");
-    }
 
     const cleanedHotelList = [];
 
