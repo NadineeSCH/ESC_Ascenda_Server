@@ -123,6 +123,6 @@ exports.verifyOtp = async (req, res) => {
 };
 
 //UNDO COMMENT BEFORE TESTING
-// exports.tempUsers = tempUsers; // Export the tempUsers map for testing
-// exports.cleanup = cleanup; // Export the cleanup function for testing
-// exports.performCleaning = performCleaning; // Export the performCleaning function for testing
+exports.tempUsers = tempUsers; // Export the tempUsers map for testing
+exports.cleanup = cleanup; // Export the cleanup function for testing
+exports.performCleaning = performCleaning; // Export the performCleaning function for testing

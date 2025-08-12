@@ -84,11 +84,11 @@ describe("Auth Routes Integration", () => {
   it("should reject OTP verification with missing email or otp", async () => {
     let res = await request(app).post("/api/auth/verify-otp").send({ email: validUser.email });
     expect(res.status).toBe(400);
-    expect(res.body.message).toBe("Invalid OTP");
+    expect(res.body.message).toBe("Email and OTP are required");
 
     res = await request(app).post("/api/auth/verify-otp").send({ otp: "1234" });
     expect(res.status).toBe(400);
-    expect(res.body.message).toBe("Invalid OTP");
+    expect(res.body.message).toBe("Email and OTP are required");
   });
 
   it("should reject invalid OTP", async () => {
