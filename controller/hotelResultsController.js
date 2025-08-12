@@ -1,5 +1,7 @@
 let dto = require('../DTO/DTO.js');
 const hotelResultsService = require('../service/hotelResultsService.js');
+const HotelResponse = require('../models/HotelResultsCache'); 
+
 
 async function getSearchResults(req, res, next) {
 
@@ -168,9 +170,83 @@ async function getSearchResults(req, res, next) {
         filters = null;
     }
 
+    // Check cache database before sending request
+    // HotelResponse.findOne({
+    // "reqParams.destination_id": destination_id,
+    // "reqParams.checkin": checkin,
+    // "reqParams.checkout": checkout,
+    // "reqParams.lang": lang,
+    // "reqParams.currency": currency,
+    // "reqParams.guestsEachRoom": guestsEachRoom,
+    // "reqParams.rooms": rooms,
+    // // you can also check filters and sorting if needed
+    // }).then(cachedResult => {
+    //     if (cachedResult) {
+    //     // Return cached data to frontend
+    //     res.json(cachedResult);
+    //     } else {
+    //     continue;
+    //     }
+    // }).catch(err => {
+    //     console.error("DB query error:", err);
+    //     res.status(500).json({ error: "Caching DB error" });
+    // });
 
     //--------ReqParams31 and ReqParams32 processing--------//
 
+    // Create cache query object matching your schema structure
+    const cacheQuery = {
+        "reqParams.destination_id": body.destination_id,
+        "reqParams.checkin": body.checkin,
+        "reqParams.checkout": body.checkout,
+        "reqParams.lang": body.lang,
+        "reqParams.currency": body.currency,
+        "reqParams.guestsEachRoom": String(guestsEachRoom),
+        "reqParams.rooms": String(rooms),
+        "reqParams.filter_exist": body.filter_exist,
+        "reqParams.sort_exist": body.sort_exist
+    };
+// Add sort parameters to cache query if they exist
+    if (body.sort_exist && sort) {
+        cacheQuery["reqParams.sort_var"] = sort.sort_var;
+        cacheQuery["reqParams.reverse"] = sort.reverse;
+    }
+
+    // Add filter parameters to cache query if they exist
+    if (body.filter_exist && filters) {
+        // Check for specific filter values
+        if (filters.minPrice !== null && filters.minPrice !== undefined) {
+            cacheQuery["reqParams.filters.minPrice"] = filters.minPrice;
+        }
+        if (filters.maxPrice !== null && filters.maxPrice !== undefined) {
+            cacheQuery["reqParams.filters.maxPrice"] = filters.maxPrice;
+        }
+        if (filters.minRating !== null && filters.minRating !== undefined) {
+            cacheQuery["reqParams.filters.minRating"] = filters.minRating;
+        }
+        if (filters.maxRating !== null && filters.maxRating !== undefined) {
+            cacheQuery["reqParams.filters.maxRating"] = filters.maxRating;
+        }
+        if (filters.minScore !== null && filters.minScore !== undefined) {
+            cacheQuery["reqParams.filters.minScore"] = filters.minScore;
+        }
+        if (filters.maxScore !== null && filters.maxScore !== undefined) {
+            cacheQuery["reqParams.filters.maxScore"] = filters.maxScore;
+        }
+    }
+
+    // Check cache database first
+    const cachedResult = await HotelResponse.findOne(cacheQuery);
+
+    if (cachedResult) {
+        console.log('Cache hit - returning cached data');
+        return res.status(200).json({
+            reqParams: body,
+            data: cachedResult.data,
+        });
+    }
+
+    // Cache miss
     const reqParams31 = new dto.ReqParam31({
         destination_id: body.destination_id,
         checkin: body.checkin,
@@ -197,6 +273,30 @@ async function getSearchResults(req, res, next) {
             reqParams: body,
             data: searchResult.data
         });
+        // Save results to cache after successful service call
+        const cacheData = new HotelResponse({
+            reqParams: {
+                destination_id: body.destination_id,
+                checkin: body.checkin,
+                checkout: body.checkout,
+                lang: body.lang,
+                currency: body.currency,
+                rooms: String(rooms),
+                guestsEachRoom: String(guestsEachRoom),
+                filter_exist: body.filter_exist,
+                filters: body.filter_exist ? filters : undefined,
+                sort_exist: body.sort_exist,
+                sort_var: body.sort_exist && sort ? sort.sort_var : undefined,
+                reverse: body.sort_exist && sort ? sort.reverse : undefined
+            },
+            data: searchResult.data
+            // cachedAt is automatically set by schema default
+        });
+        // Save to cache (fire and forget - don't wait for it to complete)
+        cacheData.save().catch(error => {
+            console.error('Failed to save to cache:', error);
+            // Don't fail the request if caching fails
+        });
 
     } catch (error) {
         console.error('controller error:', error);
@@ -212,6 +312,7 @@ async function getSearchResults(req, res, next) {
             }
         });
     }
+    
 }
 
 module.exports = {

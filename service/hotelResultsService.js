@@ -4,6 +4,8 @@ const defaultImg = '1.jpg';
 
 async function processSearchResults(reqParams31, reqParams32, filters, sort) {
     let data1, data2;
+
+    
     try {
         data1 = await utils.ascendaApiCaller(1, reqParams31);
         data2 = await utils.ascendaApiCaller(2, reqParams32);
