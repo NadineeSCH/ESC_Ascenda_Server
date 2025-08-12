@@ -2,7 +2,7 @@ const request = require("supertest");
 const express = require("express");
 const bodyParser = require("body-parser");
 
-jest.mock("../../service/paymentService"); // mock paymentService
+jest.mock("../../service/paymentService");
 const paymentService = require("../../service/paymentService");
 
 // Mock authMiddleware to just call next()

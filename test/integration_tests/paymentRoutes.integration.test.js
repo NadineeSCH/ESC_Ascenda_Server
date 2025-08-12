@@ -1,4 +1,3 @@
-// test/integration_tests/paymentRoutes.integration.test.js
 const request = require("supertest");
 const express = require("express");
 const paymentRoutes = require("../../routes/paymentRoutes");

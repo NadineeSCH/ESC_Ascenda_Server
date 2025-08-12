@@ -1,4 +1,3 @@
-// test/integration_tests/paymentService.integration.test.js
 const stripe = require("stripe");
 const paymentService = require("../../service/paymentService");
 const User = require("../../models/User");
@@ -16,7 +15,6 @@ jest.mock("stripe", () => {
   return StripeMock;
 });
 
-// Mock User model
 jest.mock("../../models/User");
 
 describe("Payment Service Integration", () => {
