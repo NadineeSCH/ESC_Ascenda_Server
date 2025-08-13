@@ -43,19 +43,39 @@ exports.getPurchaseHistory = async (stripeCustomerId) => {
     const charges = await stripe.charges.list({
       customer: stripeCustomerId,
       limit: 100,
-      expand: ['data.invoice'] // Optional: expand related objects
+      expand: ['data.payment_intent'] // Expand payment intent to get full metadata
     });
+    return charges.data.map(charge => {
+      // Get metadata from either the charge or the payment intent
+      const metadata = charge.payment_intent?.metadata || charge.metadata || {};
+      
+      // Parse any stringified JSON fields in metadata
+      const parsedMetadata = Object.fromEntries(
+        Object.entries(metadata).map(([key, value]) => {
+          try {
+            // Attempt to parse JSON strings (like stringified objects)
+            return [key, typeof value === 'string' ? 
+                   (value.startsWith('{') ? JSON.parse(value) : value) : 
+                   value];
+          } catch (e) {
+            return [key, value]; // Return original if parsing fails
+          }
+        })
+      );
 
-    return charges.data.map(charge => ({
-      id: charge.id,
-      amount: charge.amount, 
-      currency: charge.currency,
-      created: new Date(charge.created * 1000), // Convert timestamp to Date
-      description: charge.description || 'Payment',
-      status: charge.status,
-      receipt_url: charge.receipt_url,
-      data: charge.metadata
-    }));
+    return {
+        id: charge.id,
+        amount: charge.amount / 100, // Convert cents to dollars
+        currency: charge.currency.toUpperCase(),
+        created: new Date(charge.created * 1000),
+        description: charge.description || 'Payment',
+        status: charge.status,
+        receipt_url: charge.receipt_url,
+        metadata: parsedMetadata,
+        payment_method: charge.payment_method_details?.type,
+        card_last4: charge.payment_method_details?.card?.last4
+      };
+    });
     
   } catch (err) {
     console.error('Stripe API error:', err);
