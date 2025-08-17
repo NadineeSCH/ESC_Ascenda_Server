@@ -4,7 +4,7 @@ const fetchMock = require("jest-fetch-mock");
 // Enable fetch mocking
 fetchMock.enableMocks();
 
-describe("hotelDetailsService", () => {
+describe("hotelRoomsService Integration test", () => {
   const mockReq = {
     hotel_id: "123",
     destination_id: "456",
